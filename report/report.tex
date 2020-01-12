@@ -1,0 +1,376 @@
+\documentclass[]{article}
+\usepackage{graphicx}
+\usepackage{paralist}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{url}
+
+\begin{document}
+\oddsidemargin -10mm
+\evensidemargin -10mm
+\textwidth 160mm
+\textheight 200mm
+\renewcommand\baselinestretch{1.0}
+
+\pagestyle {plain}
+\pagenumbering{arabic}
+
+\newcounter{stepnum}
+\title{Assignment 4, Part 1, Specification}
+\author{SFWR ENG 2AA4}
+\maketitle
+
+
+\newpage
+
+
+\section*{Cell Types Module}
+
+\subsection*{Module}
+CellTypes
+
+\subsection*{Uses}
+N/A
+
+\subsection*{Syntax}
+
+\subsubsection* {Exported Constants}
+None
+
+\subsubsection* {Exported Types}
+LifeT = \{ALIVE, DEAD\}\\
+
+\subsubsection* {Exported Access Programs}
+
+None
+
+\newpage
+
+\section*{Cell Module}
+\subsection*{Template Module}
+Cell
+
+\subsection*{Uses}
+CellTypes
+
+\subsection*{Syntax}
+\subsubsection*{Exported Types}
+Cell = ?
+\subsubsection*{Exported Access Programs}
+\begin{tabular}{| l | l | l | p{5cm} |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new Cell &  & Cell & \\
+\hline
+new Cell & LifeT, $\mathbb{N}$, $\mathbb{N}$, $\mathbb{N}$ & Cell & invalid\_argument \\
+\hline
+get\_cnt & & $\mathbb{N}$ & None\\
+\hline
+get\_Alive & & LifeT & None \\
+\hline
+get\_x & & $\mathbb{N}$ & None\\
+\hline
+get\_y & & $\mathbb{N}$ & None\\
+\hline
+\end{tabular}
+
+\subsection*{Semantics}
+\subsubsection*{State Variables}
+$S$: LifeT \\
+$cnt$: $\mathbb{N}$ \\
+$x$: $\mathbb{N}$ \\
+$y$: $\mathbb{N}$ \\
+
+\subsubsection*{State Invariants}
+None
+
+\subsubsection*{Assumptions and Design Decisions}
+\begin{itemize}
+\item The Cell constructor is called before any instance of the class. Constructor can only be called once.
+\item No setters are provided. Cells are immutable by design.
+\end{itemize}
+
+\subsubsection*{Access Routine Specifics}
+new Cell():
+\begin{itemize}
+\item transition: $S, cnt, x, y := $DEAD, 0, 0, 0
+
+\item output: $\mathit{out} := \mathit{self}$
+\item exception: none
+\end{itemize}
+
+new Cell(c, a, b, c):
+\begin{itemize}
+\item transition: $S, cnt, x, y := $c, a, b, c
+\item output: $\mathit{out} := \mathit{self}$
+\item exception: $exc := (a < 1 || b < 1 || c < 1 ) \implies invalid\_argument$
+\end{itemize}
+
+\noindent get\_cnt():
+\begin{itemize}
+\item output: $out := cnt$
+\item exception: none
+\end{itemize}
+
+\noindent get\_x():
+\begin{itemize}
+\item output: $out := x$
+\item exception: none
+\end{itemize}
+
+\noindent get\_y():
+\begin{itemize}
+\item output: $out := y$
+\item exception: none
+\end{itemize}
+\newpage
+
+
+\section*{Game Module}
+\subsection*{Template Module}
+Game
+
+\subsection*{Uses}
+Celltypes, Cell
+
+\subsection*{Syntax}
+\subsubsection*{Exported Types}
+Game = ?
+\subsubsection*{Exported Access Programs}
+\begin{tabular}{| l | l | l | p{5cm} |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new Game &  & Game & \\
+\hline
+new Game & seq of (seq of Cell) & Game & invalid\_argument\\ 
+\hline
+set\_cell & Cell &  & none\\
+\hline
+get\_cell &$\mathbb{N}$, $\mathbb{N}$ & Cell &  invalid\_argument\\
+\hline
+get\_rows & & $\mathbb{N}$ & None\\
+\hline
+get\_cols & & $\mathbb{N}$ & None\\
+\hline
+get\_matrix & & seq of (seq of Cell) & None\\
+\hline
+update\_game & & & None\\
+\hline
+print\_state & & & None\\
+\hline
+
+\end{tabular}
+
+\subsection*{Semantics}
+\subsubsection*{Environment Variables}
+$d$: An environment variable corresponding to a monitor representation of the standard output
+of the C++ compiler.
+\subsubsection*{State Variables}
+$S$: Seq of (Seq of Cell) \\
+$rows$: $\mathbb{N}$ \\
+$cols$: $\mathbb{N}$ \\
+
+\subsubsection*{State Invariants}
+None
+
+\subsubsection*{Assumptions and Design Decisions}
+\begin{itemize}
+\item The Game constructor is called before any instance of the class. Constructor can only be called once.
+\item Default constructor (with no arguments) initalizes Game with a 15 x 15 matrix full of dead cells with 0 cnt and x and y being their position in the matrix
+\item Assuming all matrices have uniform row and column sizes
+\item Both update\_game and print\_state are state transitions. It was chosen to make update\_game a state transition because Conway's Game of Life is a state based game.
+\end{itemize}
+
+\subsubsection*{Access Routine Specifics}
+new Game():
+\begin{itemize}
+\item transition: $rows, cols, S := $15, 15, v such that $\vert$v$\vert$ = 15 $\land$ $\vert$v[0]$\vert$ = 15 $\land$ 
+$(\forall\, i: \mathbb{N} | i \in [0..14] :
+  (\forall, j: \mathbb{N} | i \in [0..14]: v[i][j].get\_Alive() == DEAD) )$ $\land$ $(\forall\, i: \mathbb{N} | i \in [0..14] :
+  (\forall, j: \mathbb{N} | i \in [0..14]: v[i][j].get\_x() == i) )$ $\land$ $(\forall\, i: \mathbb{N} | i \in [0..14] :
+  (\forall, j: \mathbb{N} | i \in [0..14]: v[i][j].get\_y() == j) )$ $\land$ $(\forall\, i: \mathbb{N} | i \in [0..14] :
+  (\forall, j: \mathbb{N} | i \in [0..14]: v[i][j].get\_cnt() == 0) )$
+
+
+\item output: $\mathit{out} := \mathit{self}$
+\item exception: none
+\end{itemize}
+
+new Game(e):
+\begin{itemize}
+\item transition: $S, cols,rows := $e, $\vert$e$\vert$,$\vert$e[0]$\vert$
+
+\item output: $\mathit{out} := \mathit{self}$
+\item exception: $exc := (|S| < 1 || |S[0] < 1 ) \implies invalid\_argument$
+\end{itemize}
+
+\noindent get\_cell(n1, n2):
+\begin{itemize}
+\item output: $out := S[n1][n2]$
+\item exception: none
+\end{itemize}
+
+\noindent set\_cell(e):
+\begin{itemize}
+\item transition: $S[e.get$\_$x()][e.get$\_$y()] := e$
+\item exception: none
+\end{itemize}
+
+\noindent get\_cols():
+\begin{itemize}
+\item output: $out := cols$
+\item exception: none
+\end{itemize}
+
+\noindent get\_row():
+\begin{itemize}
+\item output: $out := rows$
+\item exception: none
+\end{itemize}
+
+\noindent get\_matrix():
+\begin{itemize}
+\item output: $out := S$
+\item exception: none
+\end{itemize}
+
+\noindent update\_game(e):
+\begin{itemize}
+\item transition: $S := g$ such that
+$(\forall\, i: \mathbb{N} | i \in [0..rows] :
+  (\forall, j: \mathbb{N} | i \in [0..cols]: g[i][j] = update$\_$cell(S[i][j]))$
+\item exception: none
+\end{itemize}
+
+\noindent print\_state():
+\begin{itemize}
+\item transition: D := A representation of the seq of (seq cell) matrix of any given Game object, with X being alive cells and 0 being dead cells. This prints the state of the game to the screen.
+\item exception: none
+\end{itemize}
+
+
+\subsection*{Local Functions}
+\noindent alive\_neighbour\_cnt: Cell $\rightarrow$ Cell\\
+\noindent alive\_neighbour\_cnt(a) $\equiv$ Cell(a.get\_Alive(), c, a.get\_x(), a.get\_y()) where \\c =
+$(+c:Cell| c \in adj \land c.get$\_$alive() = ALIVE)$ where adj = \{$s: Cell| S $\in$ S[c.get\_x() $\pm$ 1][c.get\_y()] $\bigcup$} S[c.get\_x() ][c.get\_y() $\pm$ 1] $\bigcup$} S[c.get\_x() $\pm$ 1 ][c.get\_y() $\pm$ 1] : s$\} \\
+
+\noindent update\_life : Cell $\rightarrow$ Cell \\
+\noindent update\_life(c) $\equiv$ \\
+
+\begin{table}[h]
+\begin{tabular}{|l|l|}
+\hline
+get\_neighbour\_cnt(c) \textless 2                       & Cell(DEAD, c.get\_cnt(), c.get\_x(), c.get\_y())  \\ \hline
+get\_neighbour\_cnt(c) = 2 $\land$ c.get\_Alive() = DEAD & Cell(ALIVE, c.get\_cnt(), c.get\_x(), c.get\_y()) \\ \hline
+get\_neighbour\_cnt(c) \textgreater 3                    & Cell(DEAD, c.get\_cnt(), c.get\_x(), c.get\_y())  \\ \hline
+\end{tabular}
+\end{table}
+
+\\
+\noindent update\_all\_cnt: Seq of (Seq of Cell) $\rightarrow$ Seq of (Seq of Cell)
+\\
+\noindent update\_all\_cnt(g)$\equiv$ s such that $(\forall\, i: \mathbb{N} | i \in [0..|g| - 1] :
+  (\forall, j: \mathbb{N} | i \in [0..|g[0]| - 1]: s[i][j] = update$\_$cell(g[i][j]))$
+
+\newpage
+
+\section*{IO Module}
+\subsection*{Module}
+IO
+
+\subsection*{Uses}
+CellTypes, Cell, Game
+
+\subsection*{Syntax}
+\subsubsection*{Exported Constants}
+None
+
+\subsubsection*{Exported Access Programs}
+\begin{tabular}{| l | l | l | p{5cm} |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+Read & String & Game & \\
+\hline
+Write & String, Game  & d: text file (environment variable) &  \\
+\hline
+
+\end{tabular}
+
+\subsection*{Semantics}
+\subsubsection*{Environment Variables}
+input: File containing initial state for game \\
+output: File where game state is to be written to
+
+\subsubsection*{State Variables}
+None
+
+\subsubsection*{State Invariants}
+None
+
+\subsubsection*{Assumptions and Design Decisions}
+\begin{itemize}
+\item Input will match following description
+\end{itemize}
+
+\subsubsection*{Access Routine Semantics}
+read(s)
+\begin{itemize}
+\item read data from the file associated with the string s. This data is then converted into a Game object, with the state of the object determined by the data in the file. \\
+
+The text file has the following format. All elements are to be separated with a single space in between. The first line will contain the width and the height respectively. The next lines will be 'X's and 'O's arranged in a matrix. This matrix is a representation of the game state. X is to represent a live cell, and O is to represent a dead cell. The data is shown below: 
+\begin{table}[h]
+\hskip5.0cm\begin{tabular}{lll}
+3 & 3 &   \\
+X & X & X \\
+O & O & O \\
+X & X & X
+\end{tabular}
+\end{table}
+\item exception: none
+\end{itemize}
+
+write(g, s)
+\begin{itemize}
+\item writes the current state of the game to the file specified by the string s. This will write a representation of the game state, with X representing live cells and O representing dead ones. The data will be written to the file in the same format as above
+\item exception: none
+\end{itemize}
+
+\newpage
+
+\section*{Design Critique and Analysis}
+\begin{itemize}
+\item Essential - Several getter and setter functions are provided for the Game ADT. While this would normally violate the property of being essential (Only methods required are to display and update Game state), they are required to read and write to files, and need to be called upon in the IO module. Other than those, all methods are essential, and cannot be replaced by a combination of any other methods. 
+
+\item Information Hiding - Information hiding was done by making non required functions and state variables opaque to the user. This was done by encapsulation: modules were formed that each created ADTs. This allowed each module to develop independent of each others' implementation, since they only interfaced through the exported access programs. For example, if a different implementation was done to update the game, it wouldn't affect the IO module at all. This allows for flexibility in implementation and preserves design decisions.
+
+\item Consistent - Consistency was preserved by enforcing naming conventions and parameter orders. Methods were overwhelmingly named with all undercase letters separated by underscores. One instance where this is broken is the name of the Cell method "get\_Alive(). This should be corrected in future updates. Parameters were consistently done; for example, the parameters for any function requiring row and column indexes were always in the same order: row first, than column. Local variables were also consistenly done. In the Game module, 'c' usually denotes a cell input, while 'g' usually denotes a Game. This is however broken in the IO module, and should be corrected.
+
+\item Generality - For 2D Cellular automata, the solution is quite general. While in this implementation the Moore neighborhood of cells is used, the implementation could easily be changed to look at the von Neumann neighborhood, as the methods that define the neighborhood are implementation specific. Another example would be the rules table. While in this implementation Conway's Game of Life rules are used, any other rules could be implemented without impact to the other modules, or any of the exported access programs.
+
+\item Minimality - The design preserves minimality. Each exported access program only did one service. For example, no state changes and outputs were made. Each program either outputted something (e.g get\_cell) or changed the state (e.g set\_cell). 
+
+\item Cohesion - Cohesion was preserved by use of encapsulation and interface design. Any changes to the implementation would not change the class at all, provided the interface remained the same. This helped to reduce coupling, and helped increase cohesion. Informational cohesion was also achieved, since all methods encapsulated would work on the same data fields. For example, in the Cell class, all methods would work on Cell fields (e.g cnt, x, y) However, certain methods (e.g get\_matrix) did not contribute to the defined task of the module, weakening cohesion. Worse, these methods were implemented because they were required by other modules, increasing the amount of coupling between them. 
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
